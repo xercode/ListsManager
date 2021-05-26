@@ -1,0 +1,136 @@
+#plugin-configuration > div {
+    margin-bottom: 40px;
+}
+
+.plugin-logo {
+    max-height: 74px;
+}
+
+#toolbar {
+    margin-bottom: 30px;
+}
+
+#table-actions button {
+    margin-left: 15px;
+}
+
+.fa-check {
+    color: green;
+}
+
+.help {
+    background-color: #ffeaea;
+    padding: 9px;
+    border: 1px solid gray;
+    border-radius: 4px;
+}
+
+.msgalert, .fa-remove, .fa-exclamation {
+    color: red;
+}
+
+#messages {
+    text-align: left;
+    width: 50%;
+    border: 1px solid red;
+    border-radius: 2px;
+    padding: 10px;
+    margin: 0 auto;
+}
+
+#messages ul > li {
+    list-style: none;
+}
+
+#listresultst_processing {
+    display: block;
+    background: white !important;
+    height: 62px;
+    width: 346px;
+    margin: 0 auto;
+}
+
+#bootstrap-confirm-box-modal-submit {
+    color: white;
+}
+#bootstrap-confirm-box-modal-cancel {
+    border-color: #adadad #adadad #949494;
+    border: 1px solid #bfb4b4;
+    color: #333;
+    background-image: -webkit-linear-gradient(top, #fff 0, #e0e0e0 100%);
+    background-image: -o-linear-gradient(top, #fff 0, #e0e0e0 100%);
+    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #fff), to(#e0e0e0));
+    background-image: linear-gradient(to bottom, #fff 0, #e0e0e0 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffffff', endColorstr='#ffe0e0e0', GradientType=0);
+    filter: progid:DXImageTransform.Microsoft.gradient(enabled = false);
+    background-repeat: repeat-x;
+}
+
+/* ==============================
+   Page loader
+   ============================== */
+
+.page-loader{
+    display: block;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    background: transparent;
+    z-index: 100;
+    padding: 25px;
+}
+
+.lds-dual-ring {
+    display: inline-block;
+    width: 80px;
+    height: 80px;
+}
+.lds-dual-ring:after {
+    content: " ";
+    display: block;
+    width: 64px;
+    height: 64px;
+    margin: 8px;
+    border-radius: 50%;
+    border: 6px solid #555;
+    border-color: #555 transparent #555 transparent;
+    animation: lds-dual-ring 1.2s linear infinite;
+}
+
+.backdrop {
+    z-index: 99;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #ffffff;
+    transition: opacity .25s linear;
+    opacity: 0.8 !important;
+}
+
+@keyframes lds-dual-ring {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@media screen and (min-width: 768px) {
+    .large .modal-dialog {
+        width: 700px;
+        margin: 30px auto;
+    }
+
+    .large .modal-content {
+        -webkit-box-shadow: 0 5px 15px rgba(0, 0, 0, .5);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, .5);
+    }
+
+    .large .modal-sm {
+        width: 300px;
+    }
+}

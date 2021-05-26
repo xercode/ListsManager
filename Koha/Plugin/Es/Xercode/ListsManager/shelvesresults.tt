@@ -1,0 +1,49 @@
+[% USE raw %]
+[% USE KohaDates %]
+[% USE To %]
+{
+    "sEcho": [% sEcho | html %],
+    "iTotalRecords": [% iTotalRecords | html %],
+    "iTotalDisplayRecords": [% iTotalDisplayRecords | html %],
+    "aaData": [
+        [% FOREACH data IN aaData %]
+            {
+                "dt_type":
+                    "[% data.type | html %]",
+                "dt_action":
+                    "[% PROCESS action_form shelfnumber=data.shelfnumber shelfname=data.shelfname is_shared=data.is_shared count=data.count can_delete_shelf=data.can_delete_shelf type=data.type %]",
+                "dt_shelfname":
+                    "<a href='/cgi-bin/koha/virtualshelves/shelves.pl?op=view&shelfnumber=[% data.shelfnumber | html %]'>[% data.shelfname | html | $To %]</a>",
+                "dt_count":
+                    "[% data.count | html %] item(s)",
+                "dt_is_shared":
+                    "[% IF data.type == 2 %]Public[% ELSIF data.is_shared %]Shared[% ELSE %]Private[% END %]",
+                "dt_owner":
+                    "<a href='/cgi-bin/koha/members/moremember.pl?borrowernumber=[% data.owner | html %]'>[% data.firstname | html | $To %] [% data.surname | html | $To %]</a>",
+                "dt_sortby":
+                    [% IF data.sortby == "author" %]"Author"[% ELSIF data.sortby == "copyrightdate" %]"Year"[% ELSIF data.sortby == "itemcallnumber" %]"Call number"[% ELSIF data.sortby == "dateadded" %]"Date added"[% ELSE %]"Title"[% END %],
+                "dt_created_on":
+                    "[% data.created_on | $KohaDates %]",
+                "dt_modification_time":
+                    "[% data.modification_time | $KohaDates %]"
+            }[% UNLESS loop.last %],[% END %]
+        [% END %]
+    ]
+}
+
+[% BLOCK action_form -%]
+[%~ SET action_block = '' ~%]
+[%~ IF can_manage_shelf OR can_delete_shelf ~%]
+    [%~ shelfnumber = shelfnumber | html ~%]
+    [%~ type        = type | html ~%]
+    [%~ shelfname   = To.json(shelfname) | html ~%]
+    [%~ IF can_delete_shelf ~%]
+        [%~ action_block = action_block _ ' <p>' ~%]
+        [%~ action_block = action_block _ '<input type="checkbox" name="shelfnumber" value="' _ shelfnumber  _ '" data-name="' _ shelfname  _ '" data-is_shared="' _ is_shared  _ '" data-count="' _ count  _ '" />' ~%]
+        [%~ action_block = action_block _ '</p>' ~%]
+    [%~ END ~%]
+[%~ ELSE ~%]
+    [%~ SET action_block = 'None' ~%]
+[%~ END ~%]
+[%~ To.json(action_block) | $raw ~%]
+[%~ END ~%]

@@ -1,0 +1,280 @@
+[% USE raw %]
+[% USE Asset %]
+[% SET PRIVATE = 1 %]
+[% SET PUBLIC = 2 %]
+[% SET footerjs = 1 %]
+[% INCLUDE 'doc-head-open.inc' %]
+<title>Lists Manager Plugin</title>
+
+[% INCLUDE 'doc-head-close.inc' %]
+<link rel='stylesheet' type='text/css' href='[%PLUGIN_PATH%]/css/common.css'>
+<link rel='stylesheet' type='text/css' href='[%PLUGIN_PATH%]/css/jquery.dataTables.min.css'>
+
+<body>
+[% INCLUDE 'header.inc' %]
+[% INCLUDE 'cat-search.inc' %]
+
+<div id="breadcrumbs"><a href="/cgi-bin/koha/mainpage.pl">Home</a> &rsaquo; <a href="/cgi-bin/koha/plugins/plugins-home.pl?method=tool">Plugins</a> &rsaquo; Lists Manager &rsaquo; Run</div>
+
+<div class="main container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <main>
+                [% IF (enabled) %]
+                    <h2>Listas</h2>
+                    <div id="tabs" class="toptabs">
+                        <ul>
+                            <li id="privateshelves_tab" class="active"><a href="#tab_content">Sus listas</a></li>
+                            <li id="publicshelves_tab" class="active"><a href="#tab_content">Listas públicas</a></li>
+                        </ul>
+
+                        <div id="tab_content">
+                            <div class="alert" id="messages" style="display: none;"></div>
+                            <p>
+                                <button type="button" class="deleteshelfs btn btn-default btn-xs"><i class="fa fa-trash"></i> Eliminar las listas marcadas</button>
+                            </p>
+                            <table id="listresultst">
+                                <thead>
+                                <tr>
+                                    <th class="NoVisible">Tipo</th>
+                                    <th>Acciones</th>
+                                    <th>Nombre de lista</th>
+                                    <th>Contenidos</th>
+                                    <th>Tipo</th>
+                                    <th>Propietario</th>
+                                    <th>Ordenar por</th>
+                                    <th>Fecha de creación</th>
+                                    <th>Fecha de modificación</th>
+                                </tr>
+                                <tr class="filters_row">
+                                    <th></th>
+                                    <th></th>
+                                    <th><input class="filter text_filter" id="searchshelfname_filter" placeholder="List name"></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th><input class="filter text_filter" id="searchowner_filter" placeholder="Owner"></th>
+                                    <th>
+                                        <select class="filter text_filter" id="searchsortby_filter">
+                                            <option value=""></option>
+                                            <option value="title">Title</option>
+                                            <option value="author">Author</option>
+                                            <option value="copyrightdate">Copyrightdate</option>
+                                            <option value="itemcallnumber">Call number</option>
+                                            <option value="dateadded">Date added</option>
+                                        </select>
+                                    </th>
+                                    <th></th>
+                                    <th></th>
+                                </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                [% ELSE %]
+                    <div class="dialog alert">El plugin no está habilitado. Por favor, contacta con el administrador si desea usarlo.</div>
+                [% END %]
+            </main>
+        </div>
+    </div>   
+</div>
+
+<div class="page-loader">
+    <div class="lds-dual-ring"></div>
+</div>
+
+<div class="backdrop" style="display: none;"></div>
+
+<div id="dataPreview" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="dataPreviewLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="closebtn" data-dismiss="modal" aria-hidden="true">×</button>
+                <h3 id="dataPreviewLabel">MARC preview</h3>
+            </div>
+            <div class="modal-body">
+                <div id="loading"> <img src="[% interface | html %]/[% theme | html %]/img/spinner-small.gif" alt="" /> Loading </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" data-dismiss="modal" aria-hidden="true">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+[% MACRO jsinclude BLOCK %]
+[% INCLUDE 'datatables.inc' %]
+<script src="[%PLUGIN_PATH%]/js/common.js"></script>
+<script>
+    $(document).ready(function() {
+        $(".page-loader").hide();
+        $('#tabs').tabs();
+        
+        [% IF category == PUBLIC %]
+            var type = [% PUBLIC | html %];
+        [% ELSE %]
+            var type = [% PRIVATE | html %];
+        [% END %]
+
+        var dtListResults = $("#listresultst").dataTable($.extend(true, {}, dataTablesDefaults, {
+            "aaSorting": [[ 5, "asc" ]],
+            'bServerSide': true,
+            'sAjaxSource': "/cgi-bin/koha/plugins/run.pl",
+            'fnServerData': function(sSource, aoData, fnCallback) {
+                aoData.push({
+                    'name': 'class',
+                    'value': 'Koha::Plugin::Es::Xercode::ListsManager',
+                }, {
+                    'name': 'method',
+                    'value': 'search',
+                },{
+                    'name': 'type',
+                    'value': type,
+                },{
+                    'name': 'shelfname',
+                    'value': $("#searchshelfname_filter").val(),
+                },{
+                    'name': 'owner',
+                    'value': $("#searchowner_filter").val(),
+                },{
+                    'name': 'sortby',
+                    'value': $("#searchsortby_filter").val(),
+                },{
+                    'name': 'template_path',
+                    'value': 'shelvesresults.tt',
+                });
+                $.ajax({
+                    'dataType': 'json',
+                    'type': 'POST',
+                    'url': sSource,
+                    'data': aoData,
+                    'success': function(json){
+                        fnCallback(json);
+                    }
+                });
+            },
+            'aoColumns':[
+                { 'mDataProp': 'dt_type' },
+                { 'mDataProp': 'dt_action', 'bSortable': false, 'sClass': 'actions' },
+                { 'mDataProp': 'dt_shelfname' },
+                { 'mDataProp': 'dt_count' },
+                { 'mDataProp': 'dt_is_shared' },
+                { 'mDataProp': 'dt_owner' },
+                { 'mDataProp': 'dt_sortby' },
+                { 'mDataProp': 'dt_created_on' },
+                { 'mDataProp': 'dt_modification_time' }
+            ],
+            "aoColumnDefs": [
+                { "bVisible": false, "aTargets": [ 'NoVisible' ] }
+            ],
+            'bAutoWidth': false,
+            'sPaginationType': 'full_numbers',
+            'bFilter': false,
+            "bProcessing": true,
+            "bSortCellsTop": true
+        }));
+
+        dtListResults.fnAddFilters("filter", 750);
+
+        var tabs = $("#tabs").tabs({
+            [% IF category == PUBLIC %]
+                active: 1,
+            [% ELSE %]
+                active: 0,
+            [% END %]
+            activate: function(e, ui) {
+                var active = tabs.tabs("option", "active" );
+                if ( active == 0 ) {
+                    type = [% PRIVATE | html %];
+                    dtListResults.fnDraw();
+                } else if ( active == 1 ) {
+                    type = [% PUBLIC | html %];
+                    dtListResults.fnDraw();
+                }
+            }
+        });
+        $("body").on("click", ".deleteshelf", function(){
+            return confirmDelete(MSG_CONFIRM_DELETE_LIST);
+        });
+
+        $(".deleteshelfs").on("click", function(e){
+            e.preventDefault();
+            var selected = [];
+            $('#listresultst input:checked').each(function() {
+                selected.push(
+                    {
+                        'shelfid': $(this).attr('value'),
+                        'shelfname': $(this).attr('data-name'),
+                        'count': $(this).attr('data-count'),
+                        'isshared': $(this).attr('data-is_shared'),
+                    }
+                );
+            });
+            
+            if (selected.length){
+                var message = "<p>Cantidad de listas a eliminar: "+selected.length+"</p>";
+                message += "<p>";
+                message += "<ul>";
+                for (var i=0; i<selected.length; i++){
+                    message += "<li>";
+                    message += selected[i].shelfname + " (items:" + selected[i].count + ")";
+                    if (selected[i].isshared == 1){
+                        message += ". <strong>Esta lista se ha compartido, y otros usuarios perderán acceso a la misma</strong>"
+                    }
+                    message += "</li>"
+                }
+                message += "</ul>";
+                message += "</p>";
+                
+                confirmModal( message, "¿Estás seguro de eliminar esta(s) lista(s)?", "Si", "No", function( result ){
+                        if( result ){
+                            var toremove = [];
+                            $('#listresultst input:checked').each(function() {
+                                toremove.push($(this).attr('value'));
+                            });
+                            $(".page-loader").show();
+                            $(".backdrop").show();
+                            $.ajax({
+                                type: "POST",
+                                url: '/cgi-bin/koha/plugins/run.pl',
+                                data: {
+                                    data: JSON.stringify(toremove),
+                                    class: 'Koha::Plugin::Es::Xercode::ListsManager',
+                                    method: 'removeshelves'
+                                },
+                                success: function( data ) {
+                                    if (data.result){
+                                        var error = false;
+                                        $(data.result).each( function(_index, _row) {
+                                            if (_row.type == 'alert'){
+                                                error = true;
+                                                $('#messages').append('<p>La lista '+_row.shelfid+' no pudo borrarse. Error:'+_row.code+'</p>');
+                                            }
+                                        });
+                                        if (error){
+                                            $('#messages').show();
+                                        }
+                                        setTimeout(function(){
+                                            $(".page-loader").hide();
+                                            $(".backdrop").hide();
+                                            $('#listresultst').DataTable().ajax.reload();
+                                        }, 1000);
+                                    }else{
+                                        $('#messages').html('Se ha producido un error al intentar eliminar las listas. Por favor, contacte con el administrador.');
+                                        $('#messages').show();
+                                    }
+                                }
+                            });
+                        }
+                    }
+                );
+            }else{
+                alert ("Por favor, seleccione alguna lista a borrar");
+            }
+        });
+    });
+    
+</script>
+[% END %]
+<!-- Footer-->
+[% INCLUDE 'intranet-bottom.inc' %]
