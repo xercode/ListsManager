@@ -11,7 +11,6 @@ use C4::Biblio;
 use C4::Items;
 use C4::Auth;
 use C4::Reports::Guided;
-use C4::External::Depo;
 use Koha::DateUtils;
 use MARC::Record;
 use JavaScript::Minifier qw(minify);

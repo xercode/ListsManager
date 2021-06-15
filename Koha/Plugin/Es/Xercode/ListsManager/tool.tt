@@ -21,30 +21,30 @@
         <div class="col-md-12">
             <main>
                 [% IF (enabled) %]
-                    <h2>Listas</h2>
+                    <h2>Lists</h2>
                     <div id="tabs" class="toptabs">
                         <ul>
-                            <li id="privateshelves_tab" class="active"><a href="#tab_content">Sus listas</a></li>
-                            <li id="publicshelves_tab" class="active"><a href="#tab_content">Listas públicas</a></li>
+                            <li id="privateshelves_tab" class="active"><a href="#tab_content">Your lists</a></li>
+                            <li id="publicshelves_tab" class="active"><a href="#tab_content">Public lists</a></li>
                         </ul>
 
                         <div id="tab_content">
                             <div class="alert" id="messages" style="display: none;"></div>
                             <p>
-                                <button type="button" class="deleteshelfs btn btn-default btn-xs"><i class="fa fa-trash"></i> Eliminar las listas marcadas</button>
+                                <button type="button" class="deleteshelfs btn btn-default btn-xs"><i class="fa fa-trash"></i> Remove all checked lists</button>
                             </p>
                             <table id="listresultst">
                                 <thead>
                                 <tr>
-                                    <th class="NoVisible">Tipo</th>
-                                    <th>Acciones</th>
-                                    <th>Nombre de lista</th>
-                                    <th>Contenidos</th>
-                                    <th>Tipo</th>
-                                    <th>Propietario</th>
-                                    <th>Ordenar por</th>
-                                    <th>Fecha de creación</th>
-                                    <th>Fecha de modificación</th>
+                                    <th class="NoVisible">Type</th>
+                                    <th>Actions</th>
+                                    <th>List name</th>
+                                    <th>Contents</th>
+                                    <th>Type</th>
+                                    <th>Owner</th>
+                                    <th>Sort by</th>
+                                    <th>Creation date</th>
+                                    <th>Modification date</th>
                                 </tr>
                                 <tr class="filters_row">
                                     <th></th>
@@ -72,7 +72,7 @@
                         </div>
                     </div>
                 [% ELSE %]
-                    <div class="dialog alert">El plugin no está habilitado. Por favor, contacta con el administrador si desea usarlo.</div>
+                    <div class="dialog alert">The plugin is not enabled. Please, contact with the administrator if you want to use it.</div>
                 [% END %]
             </main>
         </div>
@@ -212,21 +212,21 @@
             });
             
             if (selected.length){
-                var message = "<p>Cantidad de listas a eliminar: "+selected.length+"</p>";
+                var message = "<p>Number of lists to delete: "+selected.length+"</p>";
                 message += "<p>";
                 message += "<ul>";
                 for (var i=0; i<selected.length; i++){
                     message += "<li>";
                     message += selected[i].shelfname + " (items:" + selected[i].count + ")";
                     if (selected[i].isshared == 1){
-                        message += ". <strong>Esta lista se ha compartido, y otros usuarios perderán acceso a la misma</strong>"
+                        message += ". <strong>This list has been shared, and other users will lose access to it</strong>"
                     }
                     message += "</li>"
                 }
                 message += "</ul>";
                 message += "</p>";
                 
-                confirmModal( message, "¿Estás seguro de eliminar esta(s) lista(s)?", "Si", "No", function( result ){
+                confirmModal( message, "Are you sure you  want to remove this list(s)?", "Yes", "No", function( result ){
                         if( result ){
                             var toremove = [];
                             $('#listresultst input:checked').each(function() {
@@ -248,7 +248,7 @@
                                         $(data.result).each( function(_index, _row) {
                                             if (_row.type == 'alert'){
                                                 error = true;
-                                                $('#messages').append('<p>La lista '+_row.shelfid+' no pudo borrarse. Error:'+_row.code+'</p>');
+                                                $('#messages').append('<p>The list '+_row.shelfid+' could be not removed. Error:'+_row.code+'</p>');
                                             }
                                         });
                                         if (error){
@@ -260,7 +260,7 @@
                                             $('#listresultst').DataTable().ajax.reload();
                                         }, 1000);
                                     }else{
-                                        $('#messages').html('Se ha producido un error al intentar eliminar las listas. Por favor, contacte con el administrador.');
+                                        $('#messages').html('There was an error trying to remove those  lists. Please, contact the administrator.');
                                         $('#messages').show();
                                     }
                                 }
@@ -269,7 +269,7 @@
                     }
                 );
             }else{
-                alert ("Por favor, seleccione alguna lista a borrar");
+                alert ("Please, you have to select a list (or lists) to remove");
             }
         });
     });
